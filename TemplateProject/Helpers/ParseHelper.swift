@@ -1,9 +1,9 @@
 //
 //  ParseHelper.swift
-//  Makestagram
+//  Makestagram = Template Project
+//  MakeSchool
 //
 //  Created by Caitlyn Chen on 6/29/15.
-//  Copyright (c) 2015 Make School. All rights reserved.
 //
 
 import Foundation
@@ -30,6 +30,11 @@ class ParseHelper {
     static let ParseFlaggedContentClass    = "FlaggedContent"
     static let ParseFlaggedContentFromUser = "fromUser"
     static let ParseFlaggedContentToPost   = "toPost"
+    
+    static let ParseCommentContentClass    = "Comment"
+    static let commentFromUser = "comment"
+    static let ParseCommentContentFromUser = "fromUser"
+    static let ParseCommentContentToPost   = "toPost"
     
     // User Relation
     static let ParseUserUsername      = "username"
@@ -138,7 +143,6 @@ class ParseHelper {
             return query
     }
     
-    // 2
     static func timelineRequestforCurrentUser(range: Range<Int>, completionBlock: PFArrayResultBlock) {
         let followingQuery = PFQuery(className: ParseFollowClass)
         followingQuery.whereKey(ParseLikeFromUser, equalTo:PFUser.currentUser()!)
@@ -153,9 +157,7 @@ class ParseHelper {
         query.includeKey(ParsePostUser)
         query.orderByDescending(ParsePostCreatedAt)
         
-        // 2
         query.skip = range.startIndex
-        // 3
         query.limit = range.endIndex - range.startIndex
         
         query.findObjectsInBackgroundWithBlock(completionBlock)
@@ -177,7 +179,15 @@ class ParseHelper {
         likeObject.saveInBackgroundWithBlock(nil)
     }
     
-
+    
+    static func commentPost(user: PFUser, post: Post, comment: String) {
+        let commentObject = PFObject(className: ParseCommentContentClass)
+        commentObject[commentFromUser] = comment
+        commentObject[ParseCommentContentFromUser] = user
+        commentObject[ParseCommentContentToPost] = post
+        
+        commentObject.saveInBackgroundWithBlock(nil)
+    }
     
     static func unlikePost(user: PFUser, post: Post) {
         // 1
@@ -205,6 +215,15 @@ class ParseHelper {
         query.findObjectsInBackgroundWithBlock(completionBlock)
     }
     
+    static func commentsForPost(post: Post, completionBlock: PFArrayResultBlock) {
+        let query = PFQuery(className: ParseCommentContentClass)
+        query.whereKey(ParseCommentContentToPost, equalTo: post)
+        // 2
+        query.includeKey(ParseCommentContentFromUser)
+        
+        query.findObjectsInBackgroundWithBlock(completionBlock)
+    }
+    
     static func flagsForPost(post: Post, completionBlock: PFArrayResultBlock) {
         let query = PFQuery(className: ParseFlaggedContentClass)
         query.whereKey(ParseFlaggedContentToPost, equalTo: post)
@@ -222,3 +241,4 @@ extension PFObject : Equatable {
 public func ==(lhs: PFObject, rhs: PFObject) -> Bool {
     return lhs.objectId == rhs.objectId
 }
+ 

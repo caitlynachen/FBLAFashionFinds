@@ -1,9 +1,8 @@
 //
 //  PostViewController.swift
-//  TemplateProject
 //
-//  Created by Caitlyn Chen on 7/6/15.
-//  Copyright (c) 2015 Make School. All rights reserved.
+//  explores the current post, shows data from Parse
+//  Created by Caitlyn Chen
 //
 
 import UIKit
@@ -11,28 +10,17 @@ import Bond
 import Parse
 import ParseUI
 import FBSDKCoreKit
-import Mixpanel
 
-
-class PostViewController: UIViewController, UITableViewDelegate, UITableViewDataSource {
-    let mixpanel = Mixpanel.sharedInstance()
+class PostViewController: UIViewController {
     
     var flagBond: Bond<[PFUser]?>!
     
     
-    @IBOutlet weak var servings: UILabel!
-    @IBOutlet weak var cook: UILabel!
-    @IBOutlet weak var prep: UILabel!
-    @IBOutlet weak var usernameLabel: UILabel!
     @IBOutlet weak var dateLabel: UILabel!
-    
-    @IBOutlet weak var geoButton: UIButton!
-    
-    @IBOutlet weak var instructionsTableView: UITableView!
-    @IBOutlet weak var ingredientsTableView: UITableView!
     
     var anno: PinAnnotation?
     
+    var numOfLikes: Int?
     
     @IBOutlet weak var DescriptionLabel: UILabel!
     @IBOutlet weak var imageViewDisplay: UIImageView!
@@ -44,83 +32,78 @@ class PostViewController: UIViewController, UITableViewDelegate, UITableViewData
     
     var parseLoginHelper: ParseLoginHelper!
     
+    var likList: [PFUser]?
     
     @IBOutlet weak var likeLabel: UILabel!
     
     var login: PFLogInViewController?
     
-    @IBAction func forceReload(sender: AnyObject) {
-        ingredientsTableView.reloadData()
-    }
-    
-    
-    @IBAction func geoButtonTApped(sender: AnyObject) {
-        self.performSegueWithIdentifier("fromGeoButtonToMap", sender: nil)
-    }
-    
-    @IBAction func likeButtonTapped(sender: AnyObject) {
-//        let pushQuery: PFQuery = PFInstallation.query()!
-//        pushQuery.whereKey("deviceType", equalTo: "ios")
-//        
-//        let push = PFPush()
-//        push.setQuery(pushQuery)
-//        push.setMessage("Hello, World!")
-//        
-//        push.sendPushInBackgroundWithBlock(nil)
+    //when user taps back button, return to MapView
+    @IBAction func backButtonTapped(sender: AnyObject) {
         
-        mixpanel.track("Like process", properties: ["action": "like tapped"])
-        if PFUser.currentUser() != nil{
-            mixpanel.track("Like process", properties: ["action": "already logged in"])
-            
-            anno?.post.toggleLikePost(PFUser.currentUser()!)
-            
-            // Create our Installation query
-            
-        } else{
-            //login parse viewcontroller
-            mixpanel.track("Like process", properties: ["action": "launch login screen"])
-            loginViewController.fields = .UsernameAndPassword | .LogInButton | .SignUpButton | .PasswordForgotten
-            
-            loginViewController.logInView?.backgroundColor = UIColor.whiteColor()
-            let logo = UIImage(named: "logoforparse")
-            let logoView = UIImageView(image: logo)
-            loginViewController.logInView?.logo = logoView
-            
-            
-            loginViewController.signUpController?.signUpView?.logo = logoView
-
-            
-            parseLoginHelper = ParseLoginHelper {[unowned self] user, error in
-                // Initialize the ParseLogiseguenHelper with a callback
-                println("before the error")
-                if let error = error {
-                    // 1
-                    ErrorHandling.defaultErrorHandler(error)
-                } else  if let user = user {
-                    // if login was successful, display the TabBarController
-                    // 2
-                    self.mixpanel.track("Like process", properties: ["action": "login completed and liked"])
-                    println("show post  view controller")
-                    
-                    self.loginViewController.dismissViewControllerAnimated(true, completion: nil)
-                    //****
-                    self.anno?.post.toggleLikePost(PFUser.currentUser()!)
-                    
-                    
-                }
-            }
-            
-            loginViewController.delegate = parseLoginHelper
-            loginViewController.signUpController?.delegate = parseLoginHelper
-            
-            
-            
-            self.presentViewController(loginViewController, animated: true, completion: nil)
-            
-            
-        }
+        self.performSegueWithIdentifier("backButtonToMap", sender: nil)
     }
     
+    //when like button is tapped, check if there is user, then like post
+    @IBAction func likeButtonTapped(sender: AnyObject) {
+        
+        likeButton.selected = true
+        
+        likeLabel.text = PFUser.currentUser()?.username
+
+//        if PFUser.currentUser() != nil{
+//            
+//  
+//            anno?.post.toggleLikePost(PFUser.currentUser()!)
+//            
+//            
+//            
+//        } else{
+//
+//            loginViewController.fields = .UsernameAndPassword | .LogInButton | .SignUpButton | .PasswordForgotten | .DismissButton            
+//            loginViewController.logInView?.backgroundColor = UIColor.blackColor()
+//            let logo = UIImage(named: "logoforparse")
+//            let logoView = UIImageView(image: logo)
+//            loginViewController.logInView?.logo = logoView
+//            
+//            loginViewController.signUpController?.signUpView?.backgroundColor = UIColor.blackColor()
+//
+//            
+//            loginViewController.signUpController?.signUpView?.logo = logoView
+//
+//            
+//            parseLoginHelper = ParseLoginHelper {[unowned self] user, error in
+//              
+//                if let error = error {
+//                    
+//                    ErrorHandling.defaultErrorHandler(error)
+//                } else  if let user = user {
+//                    
+//                    self.loginViewController.dismissViewControllerAnimated(true, completion: nil)
+//                    
+//                    self.anno?.post.toggleLikePost(PFUser.currentUser()!)
+//                    
+//                    
+//                }
+//            }
+//            
+//            loginViewController.delegate = parseLoginHelper
+//            loginViewController.signUpController?.delegate = parseLoginHelper
+//            
+//            
+//            
+//            self.presentViewController(loginViewController, animated: true, completion: nil)
+//            
+//            
+//        }
+//        
+//        if(PFUser.currentUser() != nil){
+//            self.anno?.post.toggleLikePost(PFUser.currentUser()!)
+//
+//        }
+    }
+    
+    //bond for likes
     var post: Post? {
         didSet {
             // free memory of image stored with post that is no longer displayed
@@ -149,28 +132,18 @@ class PostViewController: UIViewController, UITableViewDelegate, UITableViewData
     required init(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
         
-        // 1
         
         likeBond = Bond<[PFUser]?>() { [unowned self] likeList in
-            // 2
             if let likeList = likeList {
-                // 3
                 
                 self.likeLabel.text = self.stringFromUserList(likeList)
                 
-                
-                // 4
                 if PFUser.currentUser() != nil{
                     self.likeButton.selected = contains(likeList, PFUser.currentUser()!)
                     
-
                 }
-                // 5
             } else {
-                //                self.likeLabel = UILabel()
-                //                self.likeButton = UIButton()
-                // 6
-                // if there is no list of users that like this post, reset everything
+                
                 self.likeLabel.text = ""
                 self.likeButton.selected = false
             }
@@ -192,6 +165,7 @@ class PostViewController: UIViewController, UITableViewDelegate, UITableViewData
         }
     }
     
+    //upload bond for flags
     func flagBondz (){
         anno?.post.fetchFlags()
         
@@ -211,15 +185,13 @@ class PostViewController: UIViewController, UITableViewDelegate, UITableViewData
         }
         
         flags! ->> flagBond
-
-        
-        
         
     }
-    
-    
+
+    //when more button tapped, if user is the postuser, then delete or edit
+    //if the current user is not the post user, then flag
     @IBAction func moreButtonTapped(sender: AnyObject) {
-        if(PFUser.currentUser()?.username == usernameLabel.text){
+        if(PFUser.currentUser()?.username == titleLabel.text){
             let actionSheetController: UIAlertController = UIAlertController()
             
             let cancelAction: UIAlertAction = UIAlertAction(title: "Cancel", style: .Cancel) { action -> Void in
@@ -233,9 +205,6 @@ class PostViewController: UIViewController, UITableViewDelegate, UITableViewData
                 deleteAlert.addAction(dontDeleteAction)
                 let deleteAction: UIAlertAction = UIAlertAction(title: "Delete", style: .Default) { action -> Void in
                     
-                    //                    self.anno?.post.delete()
-                    self.mixpanel.track("Segue", properties: ["from Post to Map View": "Delete"])
-                    
                     self.performSegueWithIdentifier("fromPostMap", sender: nil)
                     
                 }
@@ -247,8 +216,8 @@ class PostViewController: UIViewController, UITableViewDelegate, UITableViewData
             }
             actionSheetController.addAction(takePictureAction)
             let choosePictureAction: UIAlertAction = UIAlertAction(title: "Edit", style: .Default) { action -> Void in
+                
                 self.performSegueWithIdentifier("editPost", sender: nil)
-                self.mixpanel.track("Segue", properties: ["from Post to Map View": "Edit"])
             }
             actionSheetController.addAction(choosePictureAction)
             
@@ -278,7 +247,6 @@ class PostViewController: UIViewController, UITableViewDelegate, UITableViewData
                     if PFUser.currentUser() != nil{
                         self.anno?.post.flagPost(PFUser.currentUser()!)
                         
-                        self.mixpanel.track("Segue", properties: ["from Post to Map View": "Flag"])
                         let storyboard = UIStoryboard(name: "Main", bundle: nil)
                         let mapViewController = storyboard.instantiateViewControllerWithIdentifier("MapViewController") as! MapViewController
                         self.dismissViewControllerAnimated(false, completion: nil)
@@ -286,13 +254,15 @@ class PostViewController: UIViewController, UITableViewDelegate, UITableViewData
 
                     } else{
                         //login parse viewcontroller
-                        self.loginViewController.fields = .UsernameAndPassword | .LogInButton | .SignUpButton | .PasswordForgotten
+                    self.loginViewController.fields = .UsernameAndPassword | .LogInButton | .SignUpButton | .PasswordForgotten | .DismissButton
                         
-                        self.loginViewController.logInView?.backgroundColor = UIColor.whiteColor()
+                        self.loginViewController.logInView?.backgroundColor = UIColor.blackColor()
                         let logo = UIImage(named: "logoforparse")
                         let logoView = UIImageView(image: logo)
                         self.loginViewController.logInView?.logo = logoView
                         
+                        self.loginViewController.signUpController?.signUpView?.backgroundColor = UIColor.blackColor()
+
                         self.loginViewController.signUpController?.signUpView?.logo = logoView
 
                         
@@ -306,7 +276,6 @@ class PostViewController: UIViewController, UITableViewDelegate, UITableViewData
                                 
                                 self.anno?.post.flagPost(PFUser.currentUser()!)
                                 
-                                self.mixpanel.track("Segue", properties: ["from Post to Map View": "Flag"])
                                 let storyboard = UIStoryboard(name: "Main", bundle: nil)
                                 let mapViewController = storyboard.instantiateViewControllerWithIdentifier("MapViewController") as! MapViewController
                                 self.dismissViewControllerAnimated(false, completion: nil)
@@ -345,6 +314,7 @@ class PostViewController: UIViewController, UITableViewDelegate, UITableViewData
             
             //Present the AlertController
             self.presentViewController(actionSheetController, animated: true, completion: nil)
+            
         }
     }
     
@@ -353,6 +323,8 @@ class PostViewController: UIViewController, UITableViewDelegate, UITableViewData
             
             
         } else if (segue.identifier == "fromLoginToPostView"){
+            
+        } else if (segue.identifier == "fromComToPost"){
             
         }
     }
@@ -376,37 +348,16 @@ class PostViewController: UIViewController, UITableViewDelegate, UITableViewData
     var ins: [String]?
     
     var image: UIImage?
-    
-    override func viewDidAppear(animated: Bool) {
-        ingredientsTableView.reloadData()
-        instructionsTableView.reloadData()
-    }
+
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        ingredientsTableView.delegate = self
         
-        
-        instructionsTableView.delegate = self
-        
-        
-        ing = anno?.ingredients
-        ins = anno?.instructions
-        
-        self.ingredientsTableView.registerClass(UITableViewCell.self, forCellReuseIdentifier: "cell")
-        self.instructionsTableView.registerClass(UITableViewCell.self, forCellReuseIdentifier: "instruccell")
-        
-        
-        geoButton.setTitle(anno?.subtitle, forState: .Normal)
         //post = anno?.post
-        cook.text = anno?.cook
-        prep.text = anno?.prep
-        servings.text = anno?.servings
-        titleLabel.text = anno?.title
         DescriptionLabel.text = anno?.Description
         var userfetch = anno?.user.fetchIfNeeded()
-        usernameLabel.text = anno?.user.username
+        titleLabel.text = anno?.user.username
         
         dateLabel.text = anno?.date.shortTimeAgoSinceDate(NSDate())
         
@@ -418,22 +369,19 @@ class PostViewController: UIViewController, UITableViewDelegate, UITableViewData
         anno?.post.fetchLikes()
         
         if let post = post {
-            // bind the image of the post to the 'postImage' view
-            // bind the likeBond that we defined earlier, to update like label and button when likes change
+           
             post.likes ->> likeBond
         }
-        // Do any additional setup after loading the view.
         
+        let commentQuery = PFQuery(className: "Like")
+        commentQuery.whereKey("toPost", equalTo: post!)
         
-    }
+        var comments = commentQuery.findObjects()
+
     
-    
-    @IBAction func backButtonTapped(sender: AnyObject) {
-        let storyboard = UIStoryboard(name: "Main", bundle: nil)
-        let mapViewController = storyboard.instantiateViewControllerWithIdentifier("MapViewController") as! MapViewController
-        self.dismissViewControllerAnimated(false, completion: nil)
-        self.presentViewController(mapViewController, animated: true, completion: nil)
     }
+
+
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
@@ -445,79 +393,37 @@ class PostViewController: UIViewController, UITableViewDelegate, UITableViewData
         return UITableViewAutomaticDimension
     }
     
-    func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        if tableView == ingredientsTableView {
-            var i = anno?.ingredients.count
-            return i!
-        } else {
-            var i = anno?.instructions.count
-            return i!
-        }
-    }
     
-    
-    func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
-        var myFont = UIFont(name: "Arial", size: 14.0)
-        if tableView == ingredientsTableView {
-            var cell: UITableViewCell = self.ingredientsTableView.dequeueReusableCellWithIdentifier("cell") as! UITableViewCell
-            var width = ingredientsTableView.frame.width
-            
-            cell.textLabel?.frame = CGRect(x: 0, y: 0, width: width, height: CGFloat.max)
-            cell.textLabel?.numberOfLines = 0
-            cell.textLabel?.lineBreakMode = NSLineBreakMode.ByWordWrapping
-            cell.textLabel?.sizeToFit()
-            
-            cell.textLabel?.font = myFont
-            cell.textLabel?.text = anno?.ingredients[indexPath.row]
-            
-            
-            return cell
-            
-        } else {
-            var cell: UITableViewCell = self.instructionsTableView.dequeueReusableCellWithIdentifier("instruccell") as! UITableViewCell
-            var width = instructionsTableView.frame.width
-            
-            cell.textLabel?.frame = CGRect(x: 0, y: 0, width: width, height: CGFloat.max)
-            cell.textLabel?.numberOfLines = 0
-            cell.textLabel?.lineBreakMode = NSLineBreakMode.ByWordWrapping
-            cell.textLabel?.sizeToFit()
-            
-            
-            cell.textLabel?.font = myFont
-            cell.textLabel?.text = anno?.instructions[indexPath.row]
-            return cell
-        }
-        
-    }
-    
-    
+   
     override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
         if(segue.identifier == "editPost"){
             var dest = segue.destinationViewController as! PostDisplayViewController;
             
             dest.annotation = anno
             
+        }
             
-        } else if(segue.identifier == "fromPostMap"){
+            
+        else if(segue.identifier == "fromPostMap"){
             
             var dest = segue.destinationViewController as! MapViewController;
             dest.ann = anno
             
             
-        } else if (segue.identifier == "fromGeoButtonToMap"){
-            self.mixpanel.track("Segue", properties: ["from Post to Map View": "Geo Button"])
-            var dest = segue.destinationViewController as! MapViewController;
-            dest.fromGeoButton = true
-            dest.geoButtonTitle = anno?.subtitle
-            let mapViewController = storyboard!.instantiateViewControllerWithIdentifier("MapViewController") as! MapViewController
-            
-            
-        } else if (segue.identifier == "fromPostMapForFlagBond"){
+        } 
+
+        else if (segue.identifier == "fromPostMapForFlagBond"){
             var dest = segue.destinationViewController as! MapViewController;
             dest.annForFlagPost = anno
+            
+        } else if (segue.identifier == "toCommentView"){
+            
+            var dest = segue.destinationViewController as! CommentViewController;
+            dest.anno = anno!
+            
+            
         }
     }
-    
     
     
     

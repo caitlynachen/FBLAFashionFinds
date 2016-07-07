@@ -1,9 +1,9 @@
 //
 //  PhotoTakingHelper.swift
-//  Makestagram
+//  Makestagram = Template Project
+//  MakeSchool
 //
 //  Created by Caitlyn Chen on 6/26/15.
-//  Copyright (c) 2015 Make School. All rights reserved.
 //
 
 import UIKit

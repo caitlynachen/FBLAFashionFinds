@@ -1,17 +1,17 @@
 //
 //  AnnotationView.swift
-//  TemplateProject
 //
-//  Created by Caitlyn Chen on 7/30/15.
-//  Copyright (c) 2015 Make School. All rights reserved.
+//  Created by Caitlyn Chen.
 //
 
 import UIKit
 import Parse
 import MapKit
 
+
+//mapAnnotationView customized to show a images from near Posts
 class AnnotationView: MKPointAnnotation {
+    
     var image: UIImage!
-
-
+    
 }

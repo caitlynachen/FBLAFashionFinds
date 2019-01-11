@@ -7,7 +7,7 @@
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
-	<string>com.caitlynchen.GeoRecipe</string>
+	<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
@@ -15,7 +15,7 @@
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
-	<string>1.10</string>
+	<string>1.14</string>
 	<key>CFBundleSignature</key>
 	<string>????</string>
 	<key>CFBundleURLTypes</key>
@@ -30,13 +30,23 @@
 		</dict>
 	</array>
 	<key>CFBundleVersion</key>
-	<string>1.10</string>
+	<string>1.14</string>
 	<key>FacebookAppID</key>
 	<string>1455623441430119</string>
 	<key>FacebookDisplayName</key>
 	<string>GeoRecipe</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>NSAppTransportSecurity</key>
+	<dict>
+		<key>NSAllowsArbitraryLoads</key>
+		<true/>
+		<key>NSExceptionDomains</key>
+		<dict>
+			<key>cdn.tutsplus.com</key>
+			<string></string>
+		</dict>
+	</dict>
 	<key>NSLocationAlwaysUsageDescription</key>
 	<string>Allow for best results</string>
 	<key>NSLocationWhenInUseUsageDescription</key>

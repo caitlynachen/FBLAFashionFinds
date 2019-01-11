@@ -23,17 +23,24 @@
         Post.registerSubclass()
         Comment.registerSubclass()
         
-        Parse.setApplicationId("uf95DTlUxIlJfuwq7OJZZPh0rDBvbtP2tahFTZLN", clientKey: "WymY22aHICH2eD5PdUuzOYfXv1a45j163IJJVWkO")
+//        Parse.setApplicationId("uf95DTlUxIlJfuwq7OJZZPh0rDBvbtP2tahFTZLN", clientKey: "WymY22aHICH2eD5PdUuzOYfXv1a45j163IJJVWkO")
+        
+        let configuration = ParseClientConfiguration {
+            $0.applicationId = "uf95DTlUxIlJfuwq7OJZZPh0rDBvbtP2tahFTZLN"
+            $0.clientKey =  "WymY22aHICH2eD5PdUuzOYfXv1a45j163IJJVWkO"
+            $0.server = "http://fblaffheroku2.herokuapp.com/parse"
+        }
         
         Parse.initializeWithConfiguration(configuration)
-        
+
+//        WymY22aHICH2eD5PdUuzOYfXv1a45j163IJJVWkO
 //        PFFacebookUtils.initializeFacebookWithApplicationLaunchOptions(launchOptions)
         
         // check if we have logged in user
         
         // check if we have logged in user
         // 2
-        let user = PFUser.currentUser()
+        _ = PFUser.currentUser()
         
         let startViewController: UIViewController;
         
@@ -41,7 +48,7 @@
         // 3
         // if we have a user, set the TabBarController to be the initial View Controller
         let storyboard = UIStoryboard(name: "Main", bundle: nil)
-        startViewController = storyboard.instantiateViewControllerWithIdentifier("MapViewController") as! UIViewController
+        startViewController = storyboard.instantiateViewControllerWithIdentifier("MapViewController") 
         
         
         
@@ -78,7 +85,7 @@
         FBSDKAppEvents.activateApp()
     }
     
-    func application(application: UIApplication, openURL url: NSURL, sourceApplication: String?, annotation: AnyObject?) -> Bool {
+    func application(application: UIApplication, openURL url: NSURL, sourceApplication: String?, annotation: AnyObject) -> Bool {
         return FBSDKApplicationDelegate.sharedInstance().application(application, openURL: url, sourceApplication: sourceApplication, annotation: annotation)
     }
     

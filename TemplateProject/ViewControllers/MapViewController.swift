@@ -17,7 +17,7 @@ import FBSDKCoreKit
 import FBSDKLoginKit
 
 class MapViewController: UIViewController, CLLocationManagerDelegate, UISearchBarDelegate, MKMapViewDelegate, UITextFieldDelegate {
-        
+    
     @IBOutlet weak var logoutButton: UIBarButtonItem!
     @IBOutlet weak var cancel: UIButton!
     var annotationCurrent: PinAnnotation?
@@ -51,7 +51,7 @@ class MapViewController: UIViewController, CLLocationManagerDelegate, UISearchBa
     
     var mapAnnoations: [PinAnnotation] = []
     
-
+    
     private var responseData:NSMutableData?
     private var selectedPointAnnotation:MKPointAnnotation?
     private var connection:NSURLConnection?
@@ -59,7 +59,7 @@ class MapViewController: UIViewController, CLLocationManagerDelegate, UISearchBa
     
     @IBAction func infoButtonTapped(sender: AnyObject) {
         
-            self.performSegueWithIdentifier("toInfoView", sender: nil)
+        self.performSegueWithIdentifier("toInfoView", sender: nil)
     }
     
     @IBAction func unwindToVC(segue:UIStoryboardSegue) {
@@ -67,7 +67,7 @@ class MapViewController: UIViewController, CLLocationManagerDelegate, UISearchBa
             
             
         } else if (segue.identifier == "fromPostDiplayToMap") {
-            var svc = segue.sourceViewController as! PostDisplayViewController;
+            let svc = segue.sourceViewController as! PostDisplayViewController;
             
             if svc.annotation?.post == nil{
                 
@@ -75,16 +75,16 @@ class MapViewController: UIViewController, CLLocationManagerDelegate, UISearchBa
                 
             } else {
                 svc.updatePost()
-               
+                
                 updatedPost = svc.annotation
             }
             
             
             annotationCurrent = svc.currentAnnotation
             
-
+            
         } else if (segue.identifier == "backButtonToMap"){
-            print("hello")
+            print("hello", terminator: "")
         } else if (segue.identifier == "fromInfoToMap"){
             
         }
@@ -108,7 +108,7 @@ class MapViewController: UIViewController, CLLocationManagerDelegate, UISearchBa
             //Do some other stuff
             PFUser.logOut()
             let logoutNotification: UIAlertController = UIAlertController(title: "Logout", message: "Successfully Logged Out!", preferredStyle: .Alert)
-        
+            
             
             self.presentViewController(logoutNotification, animated: true, completion: nil)
             logoutNotification.dismissViewControllerAnimated(true, completion: nil)
@@ -123,64 +123,64 @@ class MapViewController: UIViewController, CLLocationManagerDelegate, UISearchBa
         self.presentViewController(actionSheetController, animated: true, completion: nil)
         
     }
-    override func shouldPerformSegueWithIdentifier(identifier: String?, sender: AnyObject?) -> Bool {
-        if let ident = identifier {
-            if ident == "segueToPostDisplay" {
-                if let user = PFUser.currentUser(){
-                    self.dismissViewControllerAnimated(true, completion: nil)
-                    return true
-                    
-                    
-                } else {
-                    
-                    loginViewController.fields = .UsernameAndPassword | .LogInButton | .SignUpButton | .PasswordForgotten | .DismissButton
-                    
-                    loginViewController.logInView?.backgroundColor = UIColor.blackColor()
-                    let logo = UIImage(named: "logoforparse")
-                    let logoView = UIImageView(image: logo)
-                    loginViewController.logInView?.logo = logoView
-                    
-                    loginViewController.signUpController?.signUpView?.backgroundColor = UIColor.blackColor()
-                    loginViewController.signUpController?.signUpView?.logo = logoView
-                    
-                    
-                    parseLoginHelper = ParseLoginHelper {[unowned self] user, error in
-                        // Initialize the ParseLoginHelper with a callback
-                        println("before the error")
-                        if let error = error {
-                            // 1
-                            ErrorHandling.defaultErrorHandler(error)
-                        } else  if let user = user {
-                            // if login was successful, display the TabBarController
-                            // 2
-                            self.fromLoginViewController = true
-
-                             self.dismissViewControllerAnimated(true, completion: nil)
-                            
-                            self.fromLoginViewController = true
-                           
-                            self.performSegueWithIdentifier("segueToPostDisplay", sender: self)
-                            
-                        }
+    override func shouldPerformSegueWithIdentifier(identifier: String, sender: AnyObject?) -> Bool {
+        //        if let ident = identifier {
+        if identifier == "segueToPostDisplay" {
+            if PFUser.currentUser() != nil{
+                self.dismissViewControllerAnimated(true, completion: nil)
+                return true
+                
+                
+            } else {
+                
+                loginViewController.fields = [PFLogInFields.UsernameAndPassword, PFLogInFields.DismissButton, PFLogInFields.PasswordForgotten, PFLogInFields.LogInButton, PFLogInFields.SignUpButton]
+                
+                loginViewController.logInView?.backgroundColor = UIColor.blackColor()
+                let logo = UIImage(named: "logoforparse")
+                let logoView = UIImageView(image: logo)
+                loginViewController.logInView?.logo = logoView
+                
+                loginViewController.signUpController?.signUpView?.backgroundColor = UIColor.blackColor()
+                loginViewController.signUpController?.signUpView?.logo = logoView
+                
+                
+                parseLoginHelper = ParseLoginHelper {[unowned self] user, error in
+                    // Initialize the ParseLoginHelper with a callback
+                    print("before the error")
+                    if let error = error {
+                        // 1
+                        ErrorHandling.defaultErrorHandler(error)
+                    } else  if user != nil {
+                        // if login was successful, display the TabBarController
+                        // 2
+                        self.fromLoginViewController = true
+                        
+                        self.dismissViewControllerAnimated(true, completion: nil)
+                        
+                        self.fromLoginViewController = true
+                        
+                        self.performSegueWithIdentifier("segueToPostDisplay", sender: self)
                         
                     }
                     
-                   
-                   
-                    loginViewController.delegate = parseLoginHelper
-                    loginViewController.signUpController?.delegate = parseLoginHelper
-                    
-                    
-                    
-                    
-                    self.presentViewController(loginViewController, animated: true, completion: nil)
-                
-                    return false
-                    
-                    
                 }
+                
+                
+                
+                loginViewController.delegate = parseLoginHelper
+                loginViewController.signUpController?.delegate = parseLoginHelper
+                
+                
+                
+                
+                self.presentViewController(loginViewController, animated: true, completion: nil)
+                
+                return false
+                
+                
             }
         }
+        //        }
         
         return false
     }
@@ -199,10 +199,10 @@ class MapViewController: UIViewController, CLLocationManagerDelegate, UISearchBa
             toolbar.hidden = true
         }
         
-        println("in MapViewController")
+        print("in MapViewController")
         
         
-
+        
         
         fromLoginViewController = false
         
@@ -213,11 +213,11 @@ class MapViewController: UIViewController, CLLocationManagerDelegate, UISearchBa
         locationManager.startUpdatingLocation()
         
         if annotationCurrent != nil{
-            self.mapView.addAnnotation(annotationCurrent)
+            self.mapView.addAnnotation(annotationCurrent!)
             
-            var latt = annotationCurrent?.coordinate.latitude
-            var longg = annotationCurrent?.coordinate.longitude
-            var coordd = CLLocationCoordinate2D(latitude: latt!, longitude: longg!)
+            let latt = annotationCurrent?.coordinate.latitude
+            let longg = annotationCurrent?.coordinate.longitude
+            let coordd = CLLocationCoordinate2D(latitude: latt!, longitude: longg!)
             let dumbcoor = CLLocationCoordinate2D(latitude: (latt!) - 1, longitude: (longg!) - 1)
             self.mapView.setCenterCoordinate(dumbcoor, animated: true)
             let span = MKCoordinateSpanMake(0.05, 0.05)
@@ -230,14 +230,18 @@ class MapViewController: UIViewController, CLLocationManagerDelegate, UISearchBa
             
             
         } else if ann != nil {
-            ann?.post.delete()
+            do{
+                try ann?.post.delete()
+            } catch {
+                
+            }
             
-            self.mapView.removeAnnotation(ann)
+            self.mapView.removeAnnotation(ann!)
             
         } else if updatedPost != nil {
-            var latt = updatedPost?.post.location?.latitude
-            var longg = updatedPost?.post.location?.longitude
-            var coordd = CLLocationCoordinate2D(latitude: latt!, longitude: longg!)
+            let latt = updatedPost?.post.location?.latitude
+            let longg = updatedPost?.post.location?.longitude
+            let coordd = CLLocationCoordinate2D(latitude: latt!, longitude: longg!)
             let dumbcoor = CLLocationCoordinate2D(latitude: (latt!) - 1, longitude: (longg!) - 1)
             self.mapView.setCenterCoordinate(dumbcoor, animated: true)
             let span = MKCoordinateSpanMake(0.05, 0.05)
@@ -257,18 +261,18 @@ class MapViewController: UIViewController, CLLocationManagerDelegate, UISearchBa
     @IBOutlet weak var navbar: UINavigationBar!
     
     @IBAction func showSearchBar(sender: AnyObject) {
-
+        
         searchController = UISearchController(searchResultsController: nil)
         searchController.hidesNavigationBarDuringPresentation = false
         self.searchController.searchBar.delegate = self
-        presentViewController(searchController, animated: true, completion: nil)        
+        presentViewController(searchController, animated: true, completion: nil)
     }
     
     func searchBarSearchButtonClicked(searchBar: UISearchBar){
         //1
         searchBar.resignFirstResponder()
         dismissViewControllerAnimated(true, completion: nil)
-       
+        
         //2
         localSearchRequest = MKLocalSearchRequest()
         localSearchRequest.naturalLanguageQuery = searchBar.text
@@ -297,8 +301,8 @@ class MapViewController: UIViewController, CLLocationManagerDelegate, UISearchBa
         // Dispose of any resources that can be recreated.
     }
     
-    func locationManager(manager: CLLocationManager!, didFailWithError error: NSError!) {
-        println("error")
+    func locationManager(manager: CLLocationManager, didFailWithError error: NSError) {
+        print("error")
     }
     
     override func viewWillAppear(animated: Bool) {
@@ -321,12 +325,12 @@ class MapViewController: UIViewController, CLLocationManagerDelegate, UISearchBa
     var regionCenter: CLLocationCoordinate2D?
     var locforPost: CLLocationCoordinate2D?
     
-    func locationManager(manager: CLLocationManager!, didUpdateLocations locations: [AnyObject]!) {
+    func locationManager(manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
         
         if annotationCurrent == nil && updatedPost == nil {
             
             
-            var userLocation : CLLocation = locations[0] as! CLLocation
+            let userLocation : CLLocation = locations[0]
             
             self.lat = userLocation.coordinate.latitude
             self.long = userLocation.coordinate.longitude
@@ -354,8 +358,8 @@ class MapViewController: UIViewController, CLLocationManagerDelegate, UISearchBa
     }
     
     //when users moves map, make the posts from parse that are near current location appear
-    func mapView(mapView: MKMapView!, regionDidChangeAnimated animated: Bool) {
-        var loc = PFGeoPoint(latitude: mapView.centerCoordinate.latitude, longitude: mapView.centerCoordinate.longitude)
+    func mapView(mapView: MKMapView, regionDidChangeAnimated animated: Bool) {
+        let loc = PFGeoPoint(latitude: mapView.centerCoordinate.latitude, longitude: mapView.centerCoordinate.longitude)
         
         
         
@@ -364,105 +368,115 @@ class MapViewController: UIViewController, CLLocationManagerDelegate, UISearchBa
         postsQuery.whereKey("location", nearGeoPoint: loc, withinMiles: 5.0)
         //finds all posts near current locations
         
-        var posts = postsQuery.findObjects()
-        
-        if let pts = posts {
-            for post in pts {
+        do{
+            let posts: [PFObject] = try postsQuery.findObjects()
+            
+            
+            
+            for post in posts {
                 
-                println(pts.count)
-                println("posts from parse")
+                //                println(post.count)
+                //                println("posts from parse")
                 
-                var postcurrent = post as! Post
+                let postcurrent = post as! Post
+                //
+                //                let flagQuery = PFQuery(className: "FlaggedContent")
+                //                flagQuery.whereKey("toPost", equalTo: postcurrent)
                 
-                let flagQuery = PFQuery(className: "FlaggedContent")
-                flagQuery.whereKey("toPost", equalTo: postcurrent)
+                //                var flags = flagQuery.findObjects()
                 
-                var flags = flagQuery.findObjects()
+                //                if flags?.count > 3 {
+                //                    postcurrent.delete()
+                //                } else{
                 
-                if flags?.count > 3 {
-                    postcurrent.delete()
-                } else{
+                
+                
+                //                    if PFUser.currentUser() != nil{
+                //
+                ////                        let flagQueryForSpecificUser = PFQuery(className: "FlaggedContent")
+                ////
+                ////
+                ////                        flagQueryForSpecificUser.whereKey("fromUser", equalTo: PFUser.currentUser()!)
+                ////                        flagQueryForSpecificUser.whereKey("toPost", equalTo: postcurrent)
+                ////
+                ////                        var flagForSpecificUser = flagQueryForSpecificUser.findObjects()
+                ////
+                ////                        if flagForSpecificUser?.count > 0 {
+                ////
+                //                        } else {
+                if (postcurrent.imageFile != nil && postcurrent.location != nil && postcurrent.caption != nil && postcurrent.user != nil && postcurrent.date != nil ){
+                    print(" make stuff")
+                    let lati = postcurrent.location!.latitude
+                    let longi = postcurrent.location!.longitude
+                    let coor = CLLocationCoordinate2D(latitude: lati, longitude: longi)
                     
+                    var annotationParseQuery = PinAnnotation?()
                     
-                    
-                    if PFUser.currentUser() != nil{
+                    do{
+                        _ = try postcurrent.user!.fetchIfNeeded()
+                    } catch{
                         
-                        let flagQueryForSpecificUser = PFQuery(className: "FlaggedContent")
-                        
-                        
-                        flagQueryForSpecificUser.whereKey("fromUser", equalTo: PFUser.currentUser()!)
-                        flagQueryForSpecificUser.whereKey("toPost", equalTo: postcurrent)
-                        
-                        var flagForSpecificUser = flagQueryForSpecificUser.findObjects()
-                        
-                        if flagForSpecificUser?.count > 0 {
-                            
-                        } else {
-                            if (postcurrent.imageFile != nil && postcurrent.location != nil && postcurrent.caption != nil && postcurrent.user != nil && postcurrent.date != nil ){
-                                println(" make stuff")
-                                let lati = postcurrent.location!.latitude
-                                let longi = postcurrent.location!.longitude
-                                let coor = CLLocationCoordinate2D(latitude: lati, longitude: longi)
-                                
-                                var annotationParseQuery = PinAnnotation?()
-                                
-                                var userfetch = postcurrent.user!.fetchIfNeeded()
-                                var name = postcurrent.user?.username
-                                
-                                annotationParseQuery = PinAnnotation(title: name!, coordinate: coor, Description: postcurrent.caption!, image: postcurrent.imageFile!, user: postcurrent.user!, date: postcurrent.date!, post: postcurrent)
-                                
-                                
-                                //self.mapAnnoations.append(annotationcurrent!)
-                                //println("append")
-     
-                                //for anno in mapAnnoations {
-                                self.mapView.addAnnotation(annotationParseQuery)
-                                println("addanno")
-                                
-                            }
-                            
-                        }
-                        
-                    } else {
-                        
-                        if (postcurrent.imageFile != nil && postcurrent.location != nil && postcurrent.caption != nil && postcurrent.user != nil && postcurrent.date != nil ){
-                            println(" make stuff")
-                            let lati = postcurrent.location!.latitude
-                            let longi = postcurrent.location!.longitude
-                            let coor = CLLocationCoordinate2D(latitude: lati, longitude: longi)
-                            
-                            var annotationParseQuery = PinAnnotation?()
-                            
-                            var userfetch = postcurrent.user!.fetchIfNeeded()
-                            var name = postcurrent.user?.username
-                            
-                            annotationParseQuery = PinAnnotation(title: name!, coordinate: coor, Description: postcurrent.caption!, image: postcurrent.imageFile!, user: postcurrent.user!, date: postcurrent.date!, post: postcurrent)
-                            
-                            
-                            //self.mapAnnoations.append(annotationcurrent!)
-                            //println("append")
-                            //for anno in mapAnnoations {
-                            self.mapView.addAnnotation(annotationParseQuery)
-                            println("addanno")
-                            
-                        }
                     }
+                    
+                    let name = postcurrent.user?.username
+                    
+                    
+                    annotationParseQuery = PinAnnotation(title: name!, coordinate: coor, Description: postcurrent.caption!, image: postcurrent.imageFile!, user: postcurrent.user!, date: postcurrent.date!, post: postcurrent)
+                    
+                    
+                    //self.mapAnnoations.append(annotationcurrent!)
+                    //println("append")
+                    
+                    //for anno in mapAnnoations {
+                    self.mapView.addAnnotation(annotationParseQuery!)
+                    print("addanno")
                     
                 }
             }
+            
+            //                    } else {
+            //
+            //                        if (postcurrent.imageFile != nil && postcurrent.location != nil && postcurrent.caption != nil && postcurrent.user != nil && postcurrent.date != nil ){
+            ////                            println(" make stuff")
+            //                            let lati = postcurrent.location!.latitude
+            //                            let longi = postcurrent.location!.longitude
+            //                            let coor = CLLocationCoordinate2D(latitude: lati, longitude: longi)
+            //
+            //                            var annotationParseQuery = PinAnnotation?()
+            //
+            //                            var userfetch = postcurrent.user!.fetchIfNeeded()
+            //                            var name = postcurrent.user?.username
+            //
+            //                            annotationParseQuery = PinAnnotation(title: name!, coordinate: coor, Description: postcurrent.caption!, image: postcurrent.imageFile!, user: postcurrent.user!, date: postcurrent.date!, post: postcurrent)
+            //
+            //
+            //                            //self.mapAnnoations.append(annotationcurrent!)
+            //                            //println("append")
+            //                            //for anno in mapAnnoations {
+            //                            self.mapView.addAnnotation(annotationParseQuery!)
+            ////                            tln                            print("addanno")
+            //
+            //                        }
+            
+        }  catch{
+            
         }
+        
+        
         
     }
     
     //customize annotation view
-    func mapView(mapView: MKMapView!, viewForAnnotation annotation: MKAnnotation!) -> MKAnnotationView! {
-        var view: MKAnnotationView?
-
+    func mapView(mapView: MKMapView, viewForAnnotation annotation: MKAnnotation) -> MKAnnotationView? {
+        //        var view: MKAnnotationView?
+        
         if annotation is MKUserLocation{
             return nil
         } else if !(annotation is PinAnnotation) {
             return nil
         }
+        
+        //        var anView: MKAnnotaionView?
         
         var anView: MKAnnotationView?
         
@@ -471,7 +485,8 @@ class MapViewController: UIViewController, CLLocationManagerDelegate, UISearchBa
             let identifier = "postsFromParseAnnotations"
             
             anView = mapView.dequeueReusableAnnotationViewWithIdentifier(identifier)
-            if anView == nil {
+            if anView == nil{
+                
                 anView = MKAnnotationView(annotation: annotation, reuseIdentifier: identifier)
                 anView!.canShowCallout = true
             }
@@ -486,20 +501,44 @@ class MapViewController: UIViewController, CLLocationManagerDelegate, UISearchBa
             
             
             let pinanno = annotation as! PinAnnotation
-            if (pinanno.image.getData() != nil){
-                let data = pinanno.image.getData()
+            //            do{
+            //                if pinanno.image.getData(){
+            do{
+                let data: NSData = try pinanno.image.getData()
+                
                 let size = CGSize(width: 30.0, height: 30.0)
                 
-                let imagee = UIImage(data: data!)
+                let imagee = UIImage(data: data)
                 let scaledImage = imageResize(imagee!, sizeChange: size)
                 anView!.image = scaledImage
                 anView?.layer.borderColor = UIColor.whiteColor().CGColor
                 anView?.layer.borderWidth = 1
                 
-                
-                anView!.rightCalloutAccessoryView = UIButton.buttonWithType(.DetailDisclosure) as! UIView
+            } catch{
                 
             }
+            
+//            let playButton  = UIButton(type: .Custom)
+//            if let image = UIImage(named: "info") {
+//                playButton.setImage(image, forState: .Normal)
+//            }
+            
+            anView!.rightCalloutAccessoryView = UIButton(type: .DetailDisclosure) as UIView
+            
+            
+
+            
+            
+            
+            //                }
+            //            } catch{
+            //
+            //            }
+            //            if (pinanno.image.getData() != nil){
+            
+            
+            
+            //            }
             
             // }
             
@@ -521,9 +560,9 @@ class MapViewController: UIViewController, CLLocationManagerDelegate, UISearchBa
         return scaledImage
     }
     
-    func mapView(mapView: MKMapView!, annotationView view: MKAnnotationView!, calloutAccessoryControlTapped control: UIControl!) {
+    func mapView(mapView: MKMapView, annotationView view: MKAnnotationView, calloutAccessoryControlTapped control: UIControl) {
         if let annotation = view.annotation as? PinAnnotation {
-    
+            
             performSegueWithIdentifier("toPostView", sender: annotation)
         }
     }
@@ -547,10 +586,10 @@ class MapViewController: UIViewController, CLLocationManagerDelegate, UISearchBa
         responseData?.appendData(data)
     }
     
- 
+    
     
     func connection(connection: NSURLConnection, didFailWithError error: NSError) {
-        println("Error: \(error.localizedDescription)")
+        print("Error: \(error.localizedDescription)")
     }
     
     var fromTxtField: Bool = false
@@ -558,7 +597,7 @@ class MapViewController: UIViewController, CLLocationManagerDelegate, UISearchBa
     
     override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
         if (segue.identifier == "segueToPostDisplay") {
-            var svc = segue.destinationViewController as! PostDisplayViewController;
+            let svc = segue.destinationViewController as! PostDisplayViewController;
             
             annotationCurrent = nil
             updatedPost = nil
@@ -571,9 +610,9 @@ class MapViewController: UIViewController, CLLocationManagerDelegate, UISearchBa
         }
         
         if (segue.identifier == "toPostView"){
-            var annotation = sender as! PinAnnotation
+            let annotation = sender as! PinAnnotation
             
-            var svc = segue.destinationViewController as! PostViewController;
+            let svc = segue.destinationViewController as! PostViewController;
             svc.anno = annotation
             svc.post = annotation.post
             svc.login = loginViewController

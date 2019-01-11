@@ -13,7 +13,7 @@ import FBSDKCoreKit
 
 class PostViewController: UIViewController {
     
-    var flagBond: Bond<[PFUser]?>!
+//    var flagBond: Bond
     
     
     @IBOutlet weak var dateLabel: UILabel!
@@ -26,7 +26,7 @@ class PostViewController: UIViewController {
     @IBOutlet weak var imageViewDisplay: UIImageView!
     @IBOutlet weak var titleLabel: UILabel!
     @IBOutlet weak var likeButton: UIButton!
-    var likeBond: Bond<[PFUser]?>!
+//    var likeBond: Bond
     
     let loginViewController = PFLogInViewController()
     
@@ -108,85 +108,85 @@ class PostViewController: UIViewController {
         didSet {
             // free memory of image stored with post that is no longer displayed
             // 1
-            if let oldValue = oldValue where oldValue != post {
-                // 2
-                likeBond.unbindAll()
-                imageViewDisplay.designatedBond.unbindAll()
-                // 3
-                if (oldValue.image.bonds.count == 0) {
-                    oldValue.image.value = nil
-                }
-            }
+//            if let oldValue = oldValue where oldValue != post {
+//                // 2
+////                likeBond.unbindAll()
+//                imageViewDisplay.designatedBond.unbindAll()
+//                // 3
+//                if (oldValue.image.bonds.count == 0) {
+//                    oldValue.image.value = nil
+//                }
+//            }
             
-            if let post = post  {
-                if likeButton != nil {
-                    // bind the image of the post to the 'postImage' view
-                    // bind the likeBond that we defined earlier, to update like label and button when likes change
-                    post.likes ->> likeBond
-                }
-            }
+//            if let post = post  {
+//                if likeButton != nil {
+//                    // bind the image of the post to the 'postImage' view
+//                    // bind the likeBond that we defined earlier, to update like label and button when likes change
+//                    post.likes ->> likeBond
+//                }
+//            }
         }
     }
     
     
-    required init(coder aDecoder: NSCoder) {
+    required init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
         
         
-        likeBond = Bond<[PFUser]?>() { [unowned self] likeList in
-            if let likeList = likeList {
-                
-                self.likeLabel.text = self.stringFromUserList(likeList)
-                
-                if PFUser.currentUser() != nil{
-                    self.likeButton.selected = contains(likeList, PFUser.currentUser()!)
-                    
-                }
-            } else {
-                
-                self.likeLabel.text = ""
-                self.likeButton.selected = false
-            }
-        }
+//        likeBond = Bond() { [unowned self] likeList in
+//            if let likeList = likeList {
+//                
+//                self.likeLabel.text = self.stringFromUserList(likeList)
+//                
+//                if PFUser.currentUser() != nil{
+//                    self.likeButton.selected = contains(likeList, PFUser.currentUser()!)
+//                    
+//                }
+//            } else {
+//                
+//                self.likeLabel.text = ""
+//                self.likeButton.selected = false
+//            }
+//        }
     }
     
-    func stringFromUserList(userList: [PFUser]) -> String {
-        // 1
-        let usernameList = userList.map { user in user.username! }
-        // 2
-        let commaSeparatedUserList = ", ".join(usernameList)
-        
-        if usernameList.count < 4 {
-            
-            return commaSeparatedUserList
-        } else {
-            var string = "\(usernameList.count)"
-            return string
-        }
-    }
+//    func stringFromUserList(userList: [PFUser]) -> String {
+//        // 1
+//        let usernameList = userList.map { user in user.username! }
+//        // 2
+//        let commaSeparatedUserList = ", ".join(usernameList)
+//        
+//        if usernameList.count < 4 {
+//            
+//            return commaSeparatedUserList
+//        } else {
+//            let string = "\(usernameList.count)"
+//            return string
+//        }
+//    }
     
     //upload bond for flags
-    func flagBondz (){
-        anno?.post.fetchFlags()
-        
-        var flags = anno?.post.flags
-        
-        
-       flagBond = Bond<[PFUser]?>() { [unowned self] flagList in
-            
-            if let flagList = flagList {
-                if flagList.count > 4 {
-                    self.performSegueWithIdentifier("fromPostMap", sender: nil)
-                } else {
-                    self.performSegueWithIdentifier("fromPostMapForFlagBond", sender: nil)
-                }
-                
-            }
-        }
-        
-        flags! ->> flagBond
-        
-    }
+//    func flagBondz (){
+//        anno?.post.fetchFlags()
+//        
+//        var flags = anno?.post.flags
+//        
+//        
+//       flagBond = Bond() { [unowned self] flagList in
+//            
+//            if let flagList = flagList {
+//                if flagList.count > 4 {
+//                    self.performSegueWithIdentifier("fromPostMap", sender: nil)
+//                } else {
+//                    self.performSegueWithIdentifier("fromPostMapForFlagBond", sender: nil)
+//                }
+//                
+//            }
+//        }
+//        
+//        flags! ->> flagBond
+//        
+//    }
 
     //when more button tapped, if user is the postuser, then delete or edit
     //if the current user is not the post user, then flag
@@ -215,14 +215,14 @@ class PostViewController: UIViewController {
                 self.presentViewController(deleteAlert, animated: true, completion: nil)
             }
             actionSheetController.addAction(takePictureAction)
-            let choosePictureAction: UIAlertAction = UIAlertAction(title: "Edit", style: .Default) { action -> Void in
-                
-                self.performSegueWithIdentifier("editPost", sender: nil)
-            }
-            actionSheetController.addAction(choosePictureAction)
+//            let choosePictureAction: UIAlertAction = UIAlertAction(title: "Edit", style: .Default) { action -> Void in
+//                
+//                self.performSegueWithIdentifier("editPost", sender: nil)
+//            }
+//            actionSheetController.addAction(choosePictureAction)
             
             //We need to provide a popover sourceView when using it on iPad
-            actionSheetController.popoverPresentationController?.sourceView = sender as! UIView;
+            actionSheetController.popoverPresentationController?.sourceView = sender as? UIView;
             
             //Present the AlertController
             self.presentViewController(actionSheetController, animated: true, completion: nil)
@@ -245,7 +245,7 @@ class PostViewController: UIViewController {
                 let deleteAction: UIAlertAction = UIAlertAction(title: "Flag", style: .Default) { action -> Void in
                     
                     if PFUser.currentUser() != nil{
-                        self.anno?.post.flagPost(PFUser.currentUser()!)
+//                        self.anno?.post.flagPost(PFUser.currentUser()!)
                         
                         let storyboard = UIStoryboard(name: "Main", bundle: nil)
                         let mapViewController = storyboard.instantiateViewControllerWithIdentifier("MapViewController") as! MapViewController
@@ -254,7 +254,9 @@ class PostViewController: UIViewController {
 
                     } else{
                         //login parse viewcontroller
-                    self.loginViewController.fields = .UsernameAndPassword | .LogInButton | .SignUpButton | .PasswordForgotten | .DismissButton
+                    self.loginViewController.fields = [PFLogInFields.UsernameAndPassword, PFLogInFields.DismissButton, PFLogInFields.PasswordForgotten, PFLogInFields.LogInButton, PFLogInFields.SignUpButton]
+                        
+                        
                         
                         self.loginViewController.logInView?.backgroundColor = UIColor.blackColor()
                         let logo = UIImage(named: "logoforparse")
@@ -268,13 +270,13 @@ class PostViewController: UIViewController {
                         
                         self.parseLoginHelper = ParseLoginHelper {[unowned self] user, error in
                             // Initialize the ParseLogiseguenHelper with a callback
-                            println("before the error")
+                            print("before the error")
                             if let error = error {
                                 // 1
                                 ErrorHandling.defaultErrorHandler(error)
-                            } else  if let user = user {
+                            } else  if user != nil {
                                 
-                                self.anno?.post.flagPost(PFUser.currentUser()!)
+//                                self.anno?.post.flagPost(PFUser.currentUser()!)
                                 
                                 let storyboard = UIStoryboard(name: "Main", bundle: nil)
                                 let mapViewController = storyboard.instantiateViewControllerWithIdentifier("MapViewController") as! MapViewController
@@ -310,7 +312,7 @@ class PostViewController: UIViewController {
             
             
             //We need to provide a popover sourceView when using it on iPad
-            actionSheetController.popoverPresentationController?.sourceView = sender as! UIView;
+            actionSheetController.popoverPresentationController?.sourceView = sender as? UIView;
             
             //Present the AlertController
             self.presentViewController(actionSheetController, animated: true, completion: nil)
@@ -330,15 +332,15 @@ class PostViewController: UIViewController {
     }
     
     
-    override func shouldPerformSegueWithIdentifier(identifier: String?, sender: AnyObject?) -> Bool {
-        if let ident = identifier {
-            if ident == "toRecipeView" {
+    override func shouldPerformSegueWithIdentifier(identifier: String, sender: AnyObject?) -> Bool {
+//        if let ident = identifier {
+            if identifier == "toRecipeView" {
                 return true
-            } else if ident == "toCommentView" {
+            } else if identifier == "toCommentView" {
                 return true
             }
             
-        }
+//        }
         
         return false
         
@@ -356,28 +358,41 @@ class PostViewController: UIViewController {
         
         //post = anno?.post
         DescriptionLabel.text = anno?.Description
-        var userfetch = anno?.user.fetchIfNeeded()
+        do{
+            _ = try anno?.user.fetchIfNeeded()
+        } catch{
+            
+        }
         titleLabel.text = anno?.user.username
         
         dateLabel.text = anno?.date.shortTimeAgoSinceDate(NSDate())
         
         
-        var data = anno?.image.getData()
-        image = UIImage(data: data!)
+        do{
+            let data = try anno?.image.getData()
+            image = UIImage(data: data!)
+
+
+        }catch{
+            
+        }
+        
         
         imageViewDisplay.image = image
-        anno?.post.fetchLikes()
+//        anno?.post.fetchLikes()
         
-        if let post = post {
-           
-            post.likes ->> likeBond
-        }
+//        if let post = post {
+//           
+//            post.likes ->> likeBond
+//        }
         
         let commentQuery = PFQuery(className: "Like")
         commentQuery.whereKey("toPost", equalTo: post!)
-        
-        var comments = commentQuery.findObjects()
-
+        do{
+            _ = try commentQuery.findObjects()
+        }catch{
+            
+        }
     
     }
 
@@ -397,7 +412,7 @@ class PostViewController: UIViewController {
    
     override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
         if(segue.identifier == "editPost"){
-            var dest = segue.destinationViewController as! PostDisplayViewController;
+            let dest = segue.destinationViewController as! PostDisplayViewController;
             
             dest.annotation = anno
             
@@ -406,19 +421,19 @@ class PostViewController: UIViewController {
             
         else if(segue.identifier == "fromPostMap"){
             
-            var dest = segue.destinationViewController as! MapViewController;
+            let dest = segue.destinationViewController as! MapViewController;
             dest.ann = anno
             
             
         } 
 
         else if (segue.identifier == "fromPostMapForFlagBond"){
-            var dest = segue.destinationViewController as! MapViewController;
+            let dest = segue.destinationViewController as! MapViewController;
             dest.annForFlagPost = anno
             
         } else if (segue.identifier == "toCommentView"){
             
-            var dest = segue.destinationViewController as! CommentViewController;
+            let dest = segue.destinationViewController as! CommentViewController;
             dest.anno = anno!
             
             

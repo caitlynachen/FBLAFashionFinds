@@ -5,7 +5,8 @@
 #import <objc/runtime.h>
 #import <QuartzCore/QuartzCore.h>
 #import <CommonCrypto/CommonDigest.h>
-#import "MPCategoryHelpers.h"
+#import "UIView+MPHelpers.h"
+#import "MPFoundation.h"
 
 // NB If you add any more fingerprint methods, increment this.
 #define MP_FINGERPRINT_VERSION 1
@@ -22,7 +23,7 @@
     CGFloat offsetHeight = 0.0f;
     
     //Avoid the status bar on phones running iOS < 7
-    if ([[[UIDevice currentDevice] systemVersion] compare:@"7.0" options:NSNumericSearch] == NSOrderedAscending &&
+    if (NSFoundationVersionNumber < NSFoundationVersionNumber_iOS_7_0 &&
         ![UIApplication sharedApplication].statusBarHidden) {
         offsetHeight = [UIApplication sharedApplication].statusBarFrame.size.height;
     }
@@ -135,7 +136,7 @@
     if ([self isKindOfClass:[UIButton class]]) {
         originalImage = [((UIButton *)self) imageForState:UIControlStateNormal];
     } else if ([NSStringFromClass([self class]) isEqual:@"UITabBarButton"] && [self.subviews count] > 0 && [self.subviews[0] respondsToSelector:NSSelectorFromString(@"image")]) {
-        originalImage = [self.subviews[0] image];
+        originalImage = (UIImage *)[self.subviews[0] performSelector:@selector(image)];
     }
     
     if (originalImage) {
@@ -155,7 +156,7 @@
             data4[i] = (((data32[j] & 0x80000000) >> 24) | ((data32[j] & 0x800000) >> 17) | ((data32[j] & 0x8000) >> 10) | ((data32[j] & 0x80) >> 3) |
                         ((data32[k] & 0x80000000) >> 28) | ((data32[k] & 0x800000) >> 21) | ((data32[k] & 0x8000) >> 14) | ((data32[k] & 0x80) >> 7));
         }
-        result = [[NSData dataWithBytes:data4 length:32] base64EncodedStringWithOptions:0];
+        result = [[NSData dataWithBytes:data4 length:32] base64EncodedStringWithOptions:(NSDataBase64EncodingOptions)0];
     }
     return result;
 }

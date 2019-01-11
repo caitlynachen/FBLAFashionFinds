@@ -1,15 +1,23 @@
 PODS:
-  - DateTools (1.6.1)
-  - Mixpanel (2.8.2):
-    - Mixpanel/Mixpanel (= 2.8.2)
-  - Mixpanel/Mixpanel (2.8.2)
+  - Bond (4.3.1)
+  - ConvenienceKit (0.4.0)
+  - DateTools (1.7.0)
+  - Mixpanel (2.9.9):
+    - Mixpanel/Mixpanel (= 2.9.9)
+  - Mixpanel/Mixpanel (2.9.9)
 
 DEPENDENCIES:
+  - Bond (~> 4.3)
+  - ConvenienceKit
   - DateTools
   - Mixpanel
 
 SPEC CHECKSUMS:
-  DateTools: 9bcc89e4f2f9004d8a7a2bd1b49269cf78968e65
-  Mixpanel: f4d71ac2a306e7cda6ad03d4a2be249a0fd7a967
+  Bond: 55903fc67f09e8e49791a657163cabba1d6fb29d
+  ConvenienceKit: ba1ad8797897dc0d011676e961a2f3e9b270c841
+  DateTools: 53288ee8b905fdc75897a1e6b5cc0144b14cba60
+  Mixpanel: 818d1940c2d9402453b349545022a86968097f57
 
-COCOAPODS: 0.38.2
+PODFILE CHECKSUM: b88bae048379198532b9db9da577829384d9a85a
+
+COCOAPODS: 1.0.1

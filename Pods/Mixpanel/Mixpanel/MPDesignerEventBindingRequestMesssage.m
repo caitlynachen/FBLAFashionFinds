@@ -28,8 +28,10 @@ NSString *const MPDesignerEventBindingRequestMessageType = @"event_binding_reque
 {
     NSMutableArray *newBindings = [NSMutableArray array];
     for (NSDictionary *bindingInfo in bindingPayload) {
-        MPEventBinding *binding = [MPEventBinding bindngWithJSONObject:bindingInfo];
-        [newBindings addObject:binding];
+        MPEventBinding *binding = [MPEventBinding bindingWithJSONObject:bindingInfo];
+        if (binding) {
+            [newBindings addObject:binding];
+        }
     }
 
     if (self.bindings) {
@@ -55,7 +57,7 @@ NSString *const MPDesignerEventBindingRequestMessageType = @"event_binding_reque
 
 @end
 
-@implementation MPDesignerEventBindingRequestMesssage
+@implementation MPDesignerEventBindingRequestMessage
 
 + (instancetype)message
 {
@@ -79,7 +81,7 @@ NSString *const MPDesignerEventBindingRequestMessageType = @"event_binding_reque
             [bindingCollection updateBindings:payload];
         });
 
-        MPDesignerEventBindingResponseMesssage *changeResponseMessage = [MPDesignerEventBindingResponseMesssage message];
+        MPDesignerEventBindingResponseMessage *changeResponseMessage = [MPDesignerEventBindingResponseMessage message];
         changeResponseMessage.status = @"OK";
         [conn sendMessage:changeResponseMessage];
     }];

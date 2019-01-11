@@ -277,7 +277,7 @@ static NSMapTable *gettersForSetters;
  view before this VariantAction changed it, so we can quickly switch back
  to it if we need to stop this action. We cache the original for every
  view we apply to, as they may all have different original images. The view
- is weakly held, so if the view is dealloced for any reason, it will disappear
+ is weakly held, so if the view is deallocated for any reason, it will disappear
  from this map along with the cached original image for it.
 */
 static NSMapTable *originalCache;
@@ -556,6 +556,9 @@ static NSMapTable *originalCache;
                     for (NSUInteger i = 0; i < requiredArgs; i++) {
 
                         NSArray *argTuple = args[i];
+                        // Ensure we only send strings to the transform method
+                        if (![argTuple[1] isKindOfClass:[NSString class]]) continue;
+                        
                         id arg = transformValue(argTuple[0], argTuple[1]);
 
                         // Unpack NSValues to their base types.

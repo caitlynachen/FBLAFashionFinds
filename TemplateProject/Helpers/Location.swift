@@ -29,7 +29,7 @@ class Location{
         let geoCoder = CLGeocoder()
         geoCoder.reverseGeocodeLocation(location, completionHandler: { (placemarks, error) -> Void in
             if error != nil{
-                println("Error Reverse Geocoding Location: \(error.localizedDescription)")
+                print("Error Reverse Geocoding Location: \(error.localizedDescription)")
                 completion(placemark: nil, error: error)
                 return
             }

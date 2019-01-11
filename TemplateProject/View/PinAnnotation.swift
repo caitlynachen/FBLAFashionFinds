@@ -12,7 +12,7 @@ class PinAnnotation : NSObject, MKAnnotation {
     let user: PFUser
     let date: NSDate
     let post: Post
-    let title: String
+    let title: String?
     
     
     init (title: String, coordinate: CLLocationCoordinate2D, Description: String, image:PFFile, user: PFUser, date: NSDate, post: Post){

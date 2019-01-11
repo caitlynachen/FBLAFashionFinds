@@ -17,7 +17,7 @@ class CommentViewController: UIViewController, UITableViewDelegate, UITableViewD
     @IBOutlet weak var tableView: UITableView!
     
     var anno: PinAnnotation?
-    var commentBond: Bond<[PFObject]?>!
+    //    var commentBond: Bond
     
     
     let loginViewController = PFLogInViewController()
@@ -25,8 +25,8 @@ class CommentViewController: UIViewController, UITableViewDelegate, UITableViewD
     var parseLoginHelper: ParseLoginHelper!
     
     let textCellIdentifier = "TextCell"
-
-
+    
+    
     @IBOutlet weak var textField: UITextField!
     
     //when user taps back button, returns to PostView
@@ -47,21 +47,21 @@ class CommentViewController: UIViewController, UITableViewDelegate, UITableViewD
             self.bottomConstraint.constant = 20
             
         })
-
+        
         if PFUser.currentUser() != nil{
             
-            self.anno?.post.commentPost(PFUser.currentUser()!, comment: self.textField.text)
+            self.anno?.post.commentPost(PFUser.currentUser()!, comment: self.textField.text!)
             
         } else{
             
-            loginViewController.fields = .UsernameAndPassword | .LogInButton | .SignUpButton | .PasswordForgotten | .DismissButton
+            loginViewController.fields = [PFLogInFields.UsernameAndPassword, PFLogInFields.DismissButton, PFLogInFields.PasswordForgotten, PFLogInFields.LogInButton, PFLogInFields.SignUpButton]
             loginViewController.logInView?.backgroundColor = UIColor.blackColor()
             let logo = UIImage(named: "logoforparse")
             let logoView = UIImageView(image: logo)
             loginViewController.logInView?.logo = logoView
             
             loginViewController.signUpController?.signUpView?.backgroundColor = UIColor.blackColor()
-
+            
             
             loginViewController.signUpController?.signUpView?.logo = logoView
             
@@ -71,11 +71,11 @@ class CommentViewController: UIViewController, UITableViewDelegate, UITableViewD
                 if let error = error {
                     
                     ErrorHandling.defaultErrorHandler(error)
-                } else  if let user = user {
+                } else  if user != nil {
                     
                     self.loginViewController.dismissViewControllerAnimated(true, completion: nil)
                     
-                    self.anno?.post.commentPost(PFUser.currentUser()!, comment: self.textField.text)
+                    self.anno?.post.commentPost(PFUser.currentUser()!, comment: self.textField.text!)
                     
                     
                 }
@@ -91,39 +91,52 @@ class CommentViewController: UIViewController, UITableViewDelegate, UITableViewD
             
         }
         
-        var post = anno?.post
+        let post = anno?.post
         
         let commentQuery = PFQuery(className: "Comment")
         commentQuery.whereKey("toPost", equalTo: post!)
         
-        var comments = commentQuery.findObjects()
-        
-        if let com = comments {
-            for comment in com {
+        //        var comments: [PFObject]
+        //        do{
+        //           comments = try commentQuery.findObjects()
+        //        }catch{
+        //
+        //        }
+        do{
+            let comments = try commentQuery.findObjects()
+            
+            //        if let com = comments {
+            for comment in comments {
                 
-                var currentcom = comment as! Comment
+                let currentcom = comment as! Comment
                 
-                currentcom.fromUser?.fetchIfNeeded()
-                var user = currentcom.fromUser?.username
+                do{
+                    try currentcom.fromUser?.fetchIfNeeded()
+                } catch{
+                    
+                }
+                let user = currentcom.fromUser?.username
                 commentPosts.append(currentcom.comment!)
                 usernames.append(user!)
                 
             }
+            
+        }catch{
+            
         }
-
         tableView.reloadData()
-    
+        
         self.textField.text = ""
-
-    
+        
+        
     }
     
     @IBOutlet weak var bottomConstraint: NSLayoutConstraint!
-
+    
     //when keyboard shows, textField moves up
     func keyboardWillShow(notification: NSNotification) {
         var info = notification.userInfo!
-        var keyboardFrame: CGRect = (info[UIKeyboardFrameEndUserInfoKey] as! NSValue).CGRectValue()
+        let keyboardFrame: CGRect = (info[UIKeyboardFrameEndUserInfoKey] as! NSValue).CGRectValue()
         
         UIView.animateWithDuration(0.1, animations: { () -> Void in
             
@@ -131,37 +144,44 @@ class CommentViewController: UIViewController, UITableViewDelegate, UITableViewD
             
         })
     }
-
-
+    
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        var post = anno?.post
+        let post = anno?.post
         
+        var comments: [PFObject]?
         
         
         //download comments for current Post
         let commentQuery = PFQuery(className: "Comment")
         commentQuery.whereKey("toPost", equalTo: post!)
+        do{
+            comments = try commentQuery.findObjects()
+        } catch{
+            
+        }
         
-        var comments = commentQuery.findObjects()
-        
-        if let com = comments {
-            for comment in com {
+        if comments != nil {
+            for comment in comments! {
                 
-                var currentcom = comment as! Comment
-                
-                currentcom.fromUser?.fetchIfNeeded()
-                var user = currentcom.fromUser?.username
+                let currentcom = comment as! Comment
+                do{
+                    try currentcom.fromUser?.fetchIfNeeded()
+                } catch{
+                    
+                }
+                let user = currentcom.fromUser?.username
                 commentPosts.append(currentcom.comment!)
                 usernames.append(user!)
-
+                
                 
             }
         }
         
         
-        NSNotificationCenter.defaultCenter().addObserver(self, selector: Selector("keyboardWillShow:"), name:UIKeyboardWillShowNotification, object: nil);
+        NSNotificationCenter.defaultCenter().addObserver(self, selector: #selector(CommentViewController.keyboardWillShow(_:)), name:UIKeyboardWillShowNotification, object: nil);
         
         
         tableView.delegate = self
@@ -169,9 +189,9 @@ class CommentViewController: UIViewController, UITableViewDelegate, UITableViewD
         
         self.tableView?.registerClass(UITableViewCell.self, forCellReuseIdentifier: "cell")
         
-
+        
     }
-
+    
     //set number of rows in TableView
     func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return commentPosts.count
@@ -194,14 +214,14 @@ class CommentViewController: UIViewController, UITableViewDelegate, UITableViewD
             
             cell.nameLabel.text = usernames[row]
             cell.addressLabel.text = commentPosts[row]
-
+            
         }
         
         return cell
         
     }
     
-
+    
     override func viewDidAppear(animated: Bool) {
     }
     override func didReceiveMemoryWarning() {
@@ -209,15 +229,15 @@ class CommentViewController: UIViewController, UITableViewDelegate, UITableViewD
         // Dispose of any resources that can be recreated.
     }
     
-
+    
     /*
-    // MARK: - Navigation
-
-    // In a storyboard-based application, you will often want to do a little preparation before navigation
-    override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
-        // Get the new view controller using segue.destinationViewController.
-        // Pass the selected object to the new view controller.
-    }
-    */
-
+     // MARK: - Navigation
+     
+     // In a storyboard-based application, you will often want to do a little preparation before navigation
+     override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
+     // Get the new view controller using segue.destinationViewController.
+     // Pass the selected object to the new view controller.
+     }
+     */
+    
 }

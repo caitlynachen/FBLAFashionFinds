@@ -75,9 +75,9 @@ class PostDisplayViewController: UIViewController, UINavigationControllerDelegat
         
     }
     
-    override func shouldPerformSegueWithIdentifier(identifier: String?, sender: AnyObject?) -> Bool {
-        if let ident = identifier {
-            if ident == "fromPostDiplayToMap" {
+    override func shouldPerformSegueWithIdentifier(identifier: String, sender: AnyObject?) -> Bool {
+//        if let ident = identifier {
+            if identifier == "fromPostDiplayToMap" {
                 if imageView?.image == nil {
                     emptyLabel.text = "Please add an image."
                     emptyLabel.hidden = false
@@ -85,12 +85,12 @@ class PostDisplayViewController: UIViewController, UINavigationControllerDelegat
                 } else {
                     return true
                 }
-            } else if ident == "PresentEditLocationScene" {
+            } else if identifier == "PresentEditLocationScene" {
                 
                 return true
 
             }
-        }
+//        }
         
         return false
     }
@@ -110,21 +110,29 @@ class PostDisplayViewController: UIViewController, UINavigationControllerDelegat
                 
                 self.imageView?.image = image!
                 
-                let imageData = UIImageJPEGRepresentation(image, 0.8)
-                let imageFile = PFFile(data: imageData)
+                let imageData = UIImageJPEGRepresentation(image!, 0.8)
+                let imageFile = PFFile(data: imageData!)
                 //imageFile.save()
                 
                 //let post = PFObject(className: "Post")
                 if self.annotation == nil {
                     self.post["imageFile"] = imageFile
-                    self.post.save()
+                    do{
+                        try self.post.save()
+                    } catch{
+                        
+                    }
                     
                 } else {
-                    let imageData = UIImageJPEGRepresentation(self.imageView?.image, 0.8)
-                    let imageFile = PFFile(data: imageData)
+                    let imageData = UIImageJPEGRepresentation((self.imageView?.image)!, 0.8)
+                    let imageFile = PFFile(data: imageData!)
                     
                     self.annotation?.post.imageFile = imageFile
-                    self.annotation?.post.imageFile?.save()
+                    do{
+                        try self.annotation?.post.imageFile?.save()
+                    }catch{
+                        
+                    }
                     
                 }
                 
@@ -135,7 +143,7 @@ class PostDisplayViewController: UIViewController, UINavigationControllerDelegat
     
        func textViewDidChange(textView: UITextView) {
         if textView == descriptionText{
-            placeholderLabel.hidden = count(textView.text) != 0
+            placeholderLabel.hidden = textView.text.characters.count != 0
             
         }
     }
@@ -157,13 +165,13 @@ class PostDisplayViewController: UIViewController, UINavigationControllerDelegat
         //picker = UIPickerView(2
         
 
-        var tap: UITapGestureRecognizer = UITapGestureRecognizer(target: self, action: "dismissKeyboard")
+        let tap: UITapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(PostDisplayViewController.dismissKeyboard))
         self.view!.addGestureRecognizer(tap)
         
-        let screenSize: CGRect = UIScreen.mainScreen().bounds
+//        let screenSize: CGRect = UIScreen.mainScreen().bounds
         
-        let screenWidth = screenSize.width
-        let screenHeight = screenSize.height
+//        let screenWidth = screenSize.width
+//        let screenHeight = screenSize.height
         
         
         descriptionText.delegate = self
@@ -172,15 +180,20 @@ class PostDisplayViewController: UIViewController, UINavigationControllerDelegat
         placeholderLabel.sizeToFit()
         descriptionText.addSubview(placeholderLabel)
         
-        placeholderLabel.frame.origin = CGPointMake(5, descriptionText.font.pointSize / 2)
+        placeholderLabel.frame.origin = CGPointMake(5, descriptionText.font!.pointSize / 2)
         placeholderLabel.font = UIFont(name: placeholderLabel.font.fontName, size: 12)
         placeholderLabel.textColor = UIColor(white: 0, alpha: 0.2)
-        placeholderLabel.hidden = count(descriptionText.text) != 0
+        placeholderLabel.hidden = descriptionText.text.characters.count != 0
         
         
         if annotation?.post != nil{
-            var data = annotation?.image.getData()
-            image = UIImage(data: data!)
+            do{
+                let data = try annotation?.image.getData()
+                image = UIImage(data: data!)
+
+            } catch{
+                
+            }
             imageView?.image = image
             
             
@@ -193,8 +206,10 @@ class PostDisplayViewController: UIViewController, UINavigationControllerDelegat
             
             descriptionText.text = annotation?.Description
             
-            placeholderLabel.hidden = count(descriptionText.text) != 0
-            
+            if descriptionText.hasText() == false{
+                placeholderLabel.hidden = true
+            }
+                
             
         }
         
@@ -226,10 +241,18 @@ class PostDisplayViewController: UIViewController, UINavigationControllerDelegat
         
         annotation?.post.caption = descriptionText.text
         
+        do{
+            try annotation?.post.save()
+        }catch{
+            
+        }
         
-        annotation?.post.save()
+//        do{
         annotation?.post.saveInBackgroundWithBlock(nil)
-        
+
+//        } catch{
+//            
+//        }
         
     }
     
@@ -249,8 +272,11 @@ class PostDisplayViewController: UIViewController, UINavigationControllerDelegat
             emptyLabel.hidden = false
             
         } else {
-            
-            post.save()
+            do{
+                try post.save()
+            }catch{
+                
+            }
             post.uploadPost()
         }
 
@@ -258,19 +284,19 @@ class PostDisplayViewController: UIViewController, UINavigationControllerDelegat
         
         
         let storyboard = UIStoryboard(name: "Main", bundle: nil)
-        let mapViewController = storyboard.instantiateViewControllerWithIdentifier("MapViewController") as! MapViewController
+        _ = storyboard.instantiateViewControllerWithIdentifier("MapViewController") as! MapViewController
         
 
       
         if coordinateh == nil{
-            var latitu = toLoc?.latitude
-            var longit = toLoc?.longitude
+            let latitu = toLoc?.latitude
+            let longit = toLoc?.longitude
             
             coordinateh = CLLocationCoordinate2DMake(latitu!, longit!)
         }
         
-        var name = post.user?.username
-        var annotationToAdd = PinAnnotation(title: name!, coordinate: coordinateh!, Description: post.caption!, image: post.imageFile!, user: post.user!, date: post.date!, post: post)
+        let name = post.user?.username
+        let annotationToAdd = PinAnnotation(title: name!, coordinate: coordinateh!, Description: post.caption!, image: post.imageFile!, user: post.user!, date: post.date!, post: post)
         
         currentAnnotation = annotationToAdd
         

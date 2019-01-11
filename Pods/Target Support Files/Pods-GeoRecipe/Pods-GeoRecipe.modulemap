@@ -1,0 +1,6 @@
+framework module Pods_GeoRecipe {
+  umbrella header "Pods-GeoRecipe-umbrella.h"
+
+  export *
+  module * { export * }
+}
